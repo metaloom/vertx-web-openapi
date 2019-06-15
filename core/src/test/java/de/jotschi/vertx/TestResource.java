@@ -1,4 +1,4 @@
-package com.gentics.vertx;
+package de.jotschi.vertx;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.vertx.core.http.HttpMethod.POST;

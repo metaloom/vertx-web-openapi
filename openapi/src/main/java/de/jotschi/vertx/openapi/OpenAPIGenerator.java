@@ -10,7 +10,7 @@ import io.swagger.v3.oas.models.tags.Tag;
 
 public class OpenAPIGenerator {
 
-	public void generator() throws JsonProcessingException {
+	public void gen() throws JsonProcessingException {
 		OpenAPI spec = new OpenAPI();
 
 		PathItem i = new PathItem();
@@ -30,7 +30,7 @@ public class OpenAPIGenerator {
 	}
 
 	public static void main(String[] args) throws JsonProcessingException {
-		new OpenAPIGenerator().generator();
+		new OpenAPIGenerator().gen();
 	}
 
 }

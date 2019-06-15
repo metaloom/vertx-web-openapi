@@ -25,6 +25,11 @@ public interface Endpoint {
 	 */
 	Route getRoute();
 
+	/**
+	 * Return the display name of the endpoint.
+	 * 
+	 * @return
+	 */
 	String displayName();
 
 	/**
@@ -94,6 +99,11 @@ public interface Endpoint {
 
 	Endpoint blockingHandler(Handler<RoutingContext> requestHandler);
 
+	/**
+	 * Validate that all required fields have been set.
+	 * 
+	 * @return
+	 */
 	Endpoint validate();
 
 	Endpoint last();
@@ -116,6 +126,12 @@ public interface Endpoint {
 
 	Endpoint exampleResponse(HttpResponseStatus status, String description, String headerName, String example, String headerDescription);
 
+	/**
+	 * Set the example request model for the endpoint.
+	 * 
+	 * @param model
+	 * @return
+	 */
 	Endpoint exampleRequest(Object model);
 
 }

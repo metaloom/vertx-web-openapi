@@ -1,4 +1,4 @@
-package com.gentics.vertx;
+package de.jotschi.vertx;
 
 import static org.junit.Assert.assertEquals;
 
