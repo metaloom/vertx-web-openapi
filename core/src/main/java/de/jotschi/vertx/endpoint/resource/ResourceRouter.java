@@ -4,6 +4,7 @@ import java.util.List;
 
 import de.jotschi.vertx.endpoint.EndpointRoute;
 import de.jotschi.vertx.resource.impl.RouterEntry;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
 
 public interface ResourceRouter extends Router {
@@ -32,8 +33,21 @@ public interface ResourceRouter extends Router {
 
 	ResourceRouter description(String description);
 
+	/**
+	 * @see Router#route()
+	 */
 	EndpointRoute route();
 
+	/**
+	 * @see Router#route(HttpMethod, String)
+	 */
+	EndpointRoute route(HttpMethod method, String path);
+
+	/**
+	 * Return the wrapped router.
+	 * 
+	 * @return
+	 */
 	Router getDelegate();
 
 	List<EndpointRoute> getEndpointRoutes();
