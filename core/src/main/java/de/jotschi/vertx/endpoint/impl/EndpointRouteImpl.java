@@ -3,9 +3,9 @@ package de.jotschi.vertx.endpoint.impl;
 import de.jotschi.vertx.endpoint.AbstractEndpointImpl;
 import io.vertx.ext.web.Route;
 
-public class EndpointImpl extends AbstractEndpointImpl {
+public class EndpointRouteImpl extends AbstractEndpointImpl {
 
-	public EndpointImpl(Route route) {
+	public EndpointRouteImpl(Route route) {
 		super(route);
 	}
 

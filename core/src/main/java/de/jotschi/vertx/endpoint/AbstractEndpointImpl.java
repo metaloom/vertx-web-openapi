@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,9 +26,9 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
-public class AbstractEndpointImpl implements Endpoint {
+public abstract class AbstractEndpointImpl implements EndpointRoute {
 
-	protected static final Logger log = LoggerFactory.getLogger(Endpoint.class);
+	protected static final Logger log = LoggerFactory.getLogger(EndpointRoute.class);
 
 	protected Route route;
 
@@ -73,7 +74,7 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint handler(Handler<RoutingContext> handler) {
+	public EndpointRoute handler(Handler<RoutingContext> handler) {
 		validate();
 		route.handler(handler);
 		return this;
@@ -89,13 +90,13 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint path(String path) {
+	public EndpointRoute path(String path) {
 		route.path(path);
 		return this;
 	}
 
 	@Override
-	public Endpoint method(HttpMethod method) {
+	public EndpointRoute method(HttpMethod method) {
 		if (this.method != null) {
 			throw new RuntimeException(
 				"The method for the endpoint was already set. The endpoint wrapper currently does not support more than one method per route.");
@@ -106,40 +107,40 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint pathRegex(String path) {
+	public EndpointRoute pathRegex(String path) {
 		this.pathRegex = path;
 		route.pathRegex(path);
 		return this;
 	}
 
 	@Override
-	public Endpoint produces(String contentType) {
+	public EndpointRoute produces(String contentType) {
 		produces.add(contentType);
 		route.produces(contentType);
 		return this;
 	}
 
 	@Override
-	public Endpoint consumes(String contentType) {
+	public EndpointRoute consumes(String contentType) {
 		consumes.add(contentType);
 		route.consumes(contentType);
 		return this;
 	}
 
 	@Override
-	public Endpoint order(int order) {
+	public EndpointRoute order(int order) {
 		route.order(order);
 		return this;
 	}
 
 	@Override
-	public Endpoint last() {
+	public EndpointRoute last() {
 		route.last();
 		return this;
 	}
 
 	@Override
-	public Endpoint validate() {
+	public EndpointRoute validate() {
 		if (!produces.isEmpty() && exampleResponses.isEmpty()) {
 			log.error("Endpoint {" + path() + "} has no example response.");
 			throw new RuntimeException("Endpoint {" + path() + "} has no example responses.");
@@ -174,43 +175,43 @@ public class AbstractEndpointImpl implements Endpoint {
 //	}
 
 	@Override
-	public Endpoint blockingHandler(Handler<RoutingContext> requestHandler) {
+	public EndpointRoute blockingHandler(Handler<RoutingContext> requestHandler) {
 		route.blockingHandler(requestHandler);
 		return this;
 	}
 
 	@Override
-	public Endpoint blockingHandler(Handler<RoutingContext> requestHandler, boolean ordered) {
+	public EndpointRoute blockingHandler(Handler<RoutingContext> requestHandler, boolean ordered) {
 		route.blockingHandler(requestHandler, ordered);
 		return this;
 	}
 
 	@Override
-	public Endpoint failureHandler(Handler<RoutingContext> failureHandler) {
+	public EndpointRoute failureHandler(Handler<RoutingContext> failureHandler) {
 		route.failureHandler(failureHandler);
 		return this;
 	}
 
 	@Override
-	public Endpoint remove() {
+	public EndpointRoute remove() {
 		route.remove();
 		return this;
 	}
 
 	@Override
-	public Endpoint disable() {
+	public EndpointRoute disable() {
 		route.disable();
 		return this;
 	}
 
 	@Override
-	public Endpoint enable() {
+	public EndpointRoute enable() {
 		route.enable();
 		return this;
 	}
 
 	@Override
-	public Endpoint useNormalisedPath(boolean useNormalisedPath) {
+	public EndpointRoute useNormalisedPath(boolean useNormalisedPath) {
 		route.useNormalisedPath(useNormalisedPath);
 		return this;
 	}
@@ -221,13 +222,13 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint displayName(String name) {
+	public EndpointRoute displayName(String name) {
 		this.displayName = name;
 		return this;
 	}
 
 	@Override
-	public Endpoint description(String description) {
+	public EndpointRoute description(String description) {
 		this.description = description;
 		return this;
 	}
@@ -243,7 +244,7 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint exampleResponse(HttpResponseStatus status, String description, String headerName, String example, String headerDescription) {
+	public EndpointRoute exampleResponse(HttpResponseStatus status, String description, String headerName, String example, String headerDescription) {
 		Response response = new ResponseImpl();
 		response.description(description);
 		exampleResponses.put(status.code(), response);
@@ -259,12 +260,12 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint exampleResponse(HttpResponseStatus status, String description) {
+	public EndpointRoute exampleResponse(HttpResponseStatus status, String description) {
 		return exampleResponse(status, description, null, null, null);
 	}
 
 	@Override
-	public Endpoint exampleResponse(HttpResponseStatus status, Object model, String description) {
+	public EndpointRoute exampleResponse(HttpResponseStatus status, Object model, String description) {
 		Response response = new ResponseImpl();
 		response.description(description);
 
@@ -288,7 +289,7 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint exampleRequest(String bodyText) {
+	public EndpointRoute exampleRequest(String bodyText) {
 //		HashMap<String, MimeType> bodyMap = new HashMap<>();
 //		MimeType mimeType = new MimeType();
 //		mimeType.example(bodyText);
@@ -308,7 +309,7 @@ public class AbstractEndpointImpl implements Endpoint {
 //	}
 
 	@Override
-	public Endpoint exampleRequest(Object model) {
+	public EndpointRoute exampleRequest(Object model) {
 //		HashMap<String, MimeType> bodyMap = new HashMap<>();
 //		MimeType mimeType = new MimeType();
 //		String json = model.toJson();
@@ -332,7 +333,7 @@ public class AbstractEndpointImpl implements Endpoint {
 //	}
 
 	@Override
-	public Endpoint traits(String... traits) {
+	public EndpointRoute traits(String... traits) {
 		this.traits = traits;
 		return this;
 	}
@@ -368,7 +369,7 @@ public class AbstractEndpointImpl implements Endpoint {
 	}
 
 	@Override
-	public Endpoint queryParameter(String key, String description, String example) {
+	public EndpointRoute queryParameter(String key, String description, String example) {
 		QueryParameter param = new QueryParameterImpl(key);
 		param.description(description);
 		param.example(example);
@@ -407,7 +408,7 @@ public class AbstractEndpointImpl implements Endpoint {
 //	}
 
 	@Override
-	public Endpoint events(Event... events) {
+	public EndpointRoute events(Event... events) {
 		this.events.addAll(Arrays.asList(events));
 		return this;
 	}
@@ -420,6 +421,24 @@ public class AbstractEndpointImpl implements Endpoint {
 	@Override
 	public Set<Event> events() {
 		return events;
+	}
+
+	@Override
+	public String getPath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<HttpMethod> methods() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Route setRegexGroupsNames(List<String> groups) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
