@@ -2,14 +2,20 @@ package de.jotschi.vertx.openapi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import de.jotschi.vertx.endpoint.EndpointRoute;
-import de.jotschi.vertx.endpoint.resource.ResourceRouter;
+import de.jotschi.vertx.route.ApiRoute;
+import de.jotschi.vertx.router.ApiRouter;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -17,7 +23,7 @@ public class OpenAPIGenerator {
 
 	public static final Logger log = LoggerFactory.getLogger(OpenAPIGenerator.class);
 
-	public static String gen(ResourceRouter api) throws JsonProcessingException {
+	public static String gen(ApiRouter api) throws JsonProcessingException {
 		OpenAPI spec = new OpenAPI();
 
 		api.getEndpointRoutes().forEach(r -> {
@@ -29,7 +35,7 @@ public class OpenAPIGenerator {
 
 		api.getSubRouters().forEach(entry -> {
 			String basePath = entry.getPath();
-			ResourceRouter router = entry.getRouter();
+			ApiRouter router = entry.getRouter();
 
 			router.getEndpointRoutes().forEach(r -> {
 				PathItem item = toItem(r);
@@ -46,7 +52,7 @@ public class OpenAPIGenerator {
 		return Yaml.pretty().writeValueAsString(spec);
 	}
 
-	private static PathItem toItem(EndpointRoute r) {
+	private static PathItem toItem(ApiRoute r) {
 		PathItem pathItem = new PathItem();
 
 		pathItem.setDescription(r.description());
@@ -56,6 +62,8 @@ public class OpenAPIGenerator {
 			Operation op = new Operation();
 			op.setDescription("blub");
 			op.summary("The summary");
+			addResponses(r, op);
+			addRequests(r, op);
 			switch (r.method()) {
 			case HEAD:
 				pathItem.setHead(op);
@@ -88,6 +96,47 @@ public class OpenAPIGenerator {
 
 		}
 		return pathItem;
+	}
+
+	private static void addRequests(ApiRoute r, Operation op) {
+		if (r.exampleRequests().isEmpty()) {
+			return;
+		}
+		r.exampleRequests().forEach((exampleType, exampleRequest) -> {
+			RequestBody body = new RequestBody();
+			Content content = new Content();
+			MediaType mediaType = new MediaType();
+			mediaType.example(exampleRequest.body());
+			content.put(exampleType, mediaType);
+
+			body.setContent(content);
+			op.requestBody(body);
+		});
+
+	}
+
+	private static void addResponses(ApiRoute r, Operation op) {
+		if (r.exampleResponses().isEmpty()) {
+			return;
+		}
+		ApiResponses responses = new ApiResponses();
+		r.exampleResponses().forEach((code, response) -> {
+			ApiResponse apiResponse = new ApiResponse();
+			apiResponse.setDescription(response.description());
+
+			Content content = new Content();
+			MediaType mediaType = new MediaType();
+			Object example = response.example();
+			if (example instanceof JsonObject) {
+				example = ((JsonObject) example).encodePrettily();
+			}
+			mediaType.setExample(example);
+
+			content.put(response.mimeType(), mediaType);
+			apiResponse.setContent(content);
+			responses.addApiResponse(String.valueOf(code), apiResponse);
+		});
+		op.setResponses(responses);
 	}
 
 }

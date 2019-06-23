@@ -1,4 +1,4 @@
-package de.jotschi.vertx.endpoint.query;
+package de.jotschi.vertx.route.query;
 
 public interface QueryParameter {
 

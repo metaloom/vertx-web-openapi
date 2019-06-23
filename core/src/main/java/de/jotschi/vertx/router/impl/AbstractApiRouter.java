@@ -1,11 +1,11 @@
-package de.jotschi.vertx.resource.impl;
+package de.jotschi.vertx.router.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.jotschi.vertx.endpoint.EndpointRoute;
-import de.jotschi.vertx.endpoint.resource.ResourceRouter;
+import de.jotschi.vertx.route.ApiRoute;
+import de.jotschi.vertx.router.ApiRouter;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -14,9 +14,9 @@ import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 
-public abstract class AbstractResourceRouter implements ResourceRouter {
+public abstract class AbstractApiRouter implements ApiRouter {
 
-	protected ResourceRouter parent;
+	protected ApiRouter parent;
 
 	protected final Router router;
 
@@ -26,13 +26,13 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 
 	private List<RouterEntry> subRouters = new ArrayList<>();
 
-	private List<EndpointRoute> endpointRoutes = new ArrayList<>();
+	private List<ApiRoute> endpointRoutes = new ArrayList<>();
 
-	public AbstractResourceRouter(Router router) {
+	public AbstractApiRouter(Router router) {
 		this.router = router;
 	}
 
-	public AbstractResourceRouter(Vertx vertx) {
+	public AbstractApiRouter(Vertx vertx) {
 		this(Router.router(vertx));
 	}
 
@@ -42,78 +42,78 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public EndpointRoute route() {
+	public ApiRoute route() {
 		return wrap(getDelegate().route());
 	}
 
 	@Override
-	public EndpointRoute route(HttpMethod method, String path) {
+	public ApiRoute route(HttpMethod method, String path) {
 		return wrap(getDelegate().route(method, path));
 	}
 
 	@Override
-	public EndpointRoute route(String path) {
+	public ApiRoute route(String path) {
 		System.out.println("Adding route for {" + path + "}");
 		return wrap(getDelegate().route(path));
 	}
 
 	@Override
-	public EndpointRoute routeWithRegex(HttpMethod method, String regex) {
+	public ApiRoute routeWithRegex(HttpMethod method, String regex) {
 		return wrap(getDelegate().routeWithRegex(method, regex));
 	}
 
 	@Override
-	public EndpointRoute routeWithRegex(String regex) {
+	public ApiRoute routeWithRegex(String regex) {
 		return wrap(getDelegate().routeWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute get() {
+	public ApiRoute get() {
 		return wrap(getDelegate().get());
 	}
 
 	@Override
-	public EndpointRoute get(String path) {
+	public ApiRoute get(String path) {
 		return wrap(getDelegate().get(path));
 	}
 
 	@Override
-	public EndpointRoute getWithRegex(String regex) {
+	public ApiRoute getWithRegex(String regex) {
 		return wrap(getDelegate().getWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute head() {
+	public ApiRoute head() {
 		return wrap(getDelegate().head());
 	}
 
 	@Override
-	public EndpointRoute head(String path) {
+	public ApiRoute head(String path) {
 		return wrap(getDelegate().head(path));
 	}
 
 	@Override
-	public EndpointRoute headWithRegex(String regex) {
+	public ApiRoute headWithRegex(String regex) {
 		return wrap(getDelegate().headWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute options() {
+	public ApiRoute options() {
 		return wrap(getDelegate().options());
 	}
 
 	@Override
-	public EndpointRoute options(String path) {
+	public ApiRoute options(String path) {
 		return wrap(getDelegate().options(path));
 	}
 
 	@Override
-	public EndpointRoute optionsWithRegex(String regex) {
+	public ApiRoute optionsWithRegex(String regex) {
 		return wrap(getDelegate().optionsWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute put() {
+	public ApiRoute put() {
 		return wrap(getDelegate().put());
 	}
 
@@ -123,47 +123,47 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public EndpointRoute putWithRegex(String regex) {
+	public ApiRoute putWithRegex(String regex) {
 		return wrap(getDelegate().putWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute post() {
+	public ApiRoute post() {
 		return wrap(getDelegate().post());
 	}
 
 	@Override
-	public EndpointRoute post(String path) {
+	public ApiRoute post(String path) {
 		return wrap(getDelegate().post(path));
 	}
 
 	@Override
-	public EndpointRoute postWithRegex(String regex) {
+	public ApiRoute postWithRegex(String regex) {
 		return wrap(getDelegate().postWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute delete() {
+	public ApiRoute delete() {
 		return wrap(getDelegate().delete());
 	}
 
 	@Override
-	public EndpointRoute delete(String path) {
+	public ApiRoute delete(String path) {
 		return wrap(getDelegate().delete(path));
 	}
 
 	@Override
-	public EndpointRoute deleteWithRegex(String regex) {
+	public ApiRoute deleteWithRegex(String regex) {
 		return wrap(getDelegate().deleteWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute trace() {
+	public ApiRoute trace() {
 		return wrap(getDelegate().trace());
 	}
 
 	@Override
-	public EndpointRoute trace(String path) {
+	public ApiRoute trace(String path) {
 		return wrap(getDelegate().trace(path));
 
 	}
@@ -174,42 +174,42 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public EndpointRoute connect() {
+	public ApiRoute connect() {
 		return wrap(getDelegate().connect());
 	}
 
 	@Override
-	public EndpointRoute connect(String path) {
+	public ApiRoute connect(String path) {
 		return wrap(getDelegate().connect(path));
 	}
 
 	@Override
-	public EndpointRoute connectWithRegex(String regex) {
+	public ApiRoute connectWithRegex(String regex) {
 		return wrap(getDelegate().connectWithRegex(regex));
 	}
 
 	@Override
-	public EndpointRoute patch() {
+	public ApiRoute patch() {
 		return wrap(getDelegate().patch());
 	}
 
 	@Override
-	public EndpointRoute patch(String path) {
+	public ApiRoute patch(String path) {
 		return wrap(getDelegate().patch(path));
 	}
 
 	@Override
-	public EndpointRoute patchWithRegex(String regex) {
+	public ApiRoute patchWithRegex(String regex) {
 		return wrap(getDelegate().patchWithRegex(regex));
 	}
 
 	@Override
 	public List<Route> getRoutes() {
-		return getDelegate().getRoutes().stream().map(r -> EndpointRoute.create(r)).collect(Collectors.toList());
+		return getDelegate().getRoutes().stream().map(r -> ApiRoute.create(r)).collect(Collectors.toList());
 	}
 
 	@Override
-	public List<EndpointRoute> getEndpointRoutes() {
+	public List<ApiRoute> getEndpointRoutes() {
 		return endpointRoutes;
 	}
 
@@ -219,16 +219,16 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public ResourceRouter clear() {
+	public ApiRouter clear() {
 		getDelegate().clear();
 		return this;
 	}
 
 	@Override
-	public ResourceRouter mountSubRouter(String mountPoint, Router subRouter) {
+	public ApiRouter mountSubRouter(String mountPoint, Router subRouter) {
 		getDelegate().mountSubRouter(mountPoint, subRouter);
-		if (subRouter instanceof ResourceRouter) {
-			subRouters.add(new RouterEntry(mountPoint, (ResourceRouter) subRouter));
+		if (subRouter instanceof ApiRouter) {
+			subRouters.add(new RouterEntry(mountPoint, (ApiRouter) subRouter));
 		} else {
 			// TODO automatically wrap the router
 			throw new RuntimeException("Only resource routers can be mounted");
@@ -237,13 +237,14 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public ResourceRouter exceptionHandler(Handler<Throwable> exceptionHandler) {
+	@SuppressWarnings("deprecation")
+	public ApiRouter exceptionHandler(Handler<Throwable> exceptionHandler) {
 		getDelegate().exceptionHandler(exceptionHandler);
 		return this;
 	}
 
 	@Override
-	public ResourceRouter errorHandler(int statusCode, Handler<RoutingContext> errorHandler) {
+	public ApiRouter errorHandler(int statusCode, Handler<RoutingContext> errorHandler) {
 		getDelegate().errorHandler(statusCode, errorHandler);
 		return this;
 	}
@@ -270,7 +271,7 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public ResourceRouter label(String label) {
+	public ApiRouter label(String label) {
 		this.label = label;
 		return this;
 	}
@@ -281,13 +282,13 @@ public abstract class AbstractResourceRouter implements ResourceRouter {
 	}
 
 	@Override
-	public ResourceRouter description(String description) {
+	public ApiRouter description(String description) {
 		this.description = description;
 		return this;
 	}
 
-	private EndpointRoute wrap(Route route) {
-		EndpointRoute endpointRoute = EndpointRoute.create(route);
+	private ApiRoute wrap(Route route) {
+		ApiRoute endpointRoute = ApiRoute.create(route);
 		endpointRoutes.add(endpointRoute);
 		return endpointRoute;
 	}

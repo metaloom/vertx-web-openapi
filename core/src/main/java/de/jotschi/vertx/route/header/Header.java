@@ -1,4 +1,4 @@
-package de.jotschi.vertx.endpoint.header;
+package de.jotschi.vertx.route.header;
 
 public interface Header {
 

@@ -1,6 +1,6 @@
-package de.jotschi.vertx.endpoint.header.impl;
+package de.jotschi.vertx.route.header.impl;
 
-import de.jotschi.vertx.endpoint.header.Header;
+import de.jotschi.vertx.route.header.Header;
 
 public class HeaderImpl implements Header {
 

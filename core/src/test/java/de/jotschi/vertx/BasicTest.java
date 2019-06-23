@@ -3,25 +3,25 @@ package de.jotschi.vertx;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.vertx.core.http.HttpMethod.POST;
 
-import de.jotschi.vertx.endpoint.EndpointRoute;
-import de.jotschi.vertx.endpoint.resource.ResourceRouter;
+import de.jotschi.vertx.route.ApiRoute;
+import de.jotschi.vertx.router.ApiRouter;
 
-public class TestAPI {
+public class BasicTest {
 
-	private ResourceRouter router;
+	private ApiRouter router;
 
-	public TestAPI(ResourceRouter router) {
+	public BasicTest(ApiRouter router) {
 		this.router = router;
 	}
 
 	public void routes() {
-		EndpointRoute test = router.route();
+		ApiRoute test = router.route();
 		test.path("/test");
 		test.method(POST);
 		test.description("Test endpoint");
 		test.produces("application/json");
-		test.exampleRequest("Test request");
-		test.exampleResponse(OK, "Test response example", "The test response.");
+		test.exampleRequest("text/plain", "Test request", "The example request");
+		test.exampleResponse(OK, "text/plain", "Test response example", "The test response.");
 		// test.events(PLUGIN_DEPLOYED, PLUGIN_DEPLOYING);
 		test.handler(rc -> {
 			rc.response().end("Done");

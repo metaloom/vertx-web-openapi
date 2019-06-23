@@ -1,6 +1,6 @@
-package de.jotschi.vertx.endpoint.query.impl;
+package de.jotschi.vertx.route.query.impl;
 
-import de.jotschi.vertx.endpoint.query.QueryParameter;
+import de.jotschi.vertx.route.query.QueryParameter;
 
 public class QueryParameterImpl implements QueryParameter {
 
