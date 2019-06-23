@@ -13,7 +13,6 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import io.swagger.v3.oas.models.tags.Tag;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -23,33 +22,41 @@ public class OpenAPIGenerator {
 
 	public static final Logger log = LoggerFactory.getLogger(OpenAPIGenerator.class);
 
-	public static String gen(ApiRouter api) throws JsonProcessingException {
+	public static String gen(ApiRouter router) throws JsonProcessingException {
 		OpenAPI spec = new OpenAPI();
 
-		api.getEndpointRoutes().forEach(r -> {
+		addRoutes(spec, "", router);
+
+		router.getSubRouters().forEach(entry -> {
+			String basePath = entry.getPath();
+			ApiRouter currentRouter = entry.getRouter();
+			walkRouter(spec, basePath, currentRouter);
+		});
+
+		// Tag tag = new Tag();
+		// tag.setDescription("tag");
+		// spec.addTagsItem(tag);
+
+		return Yaml.pretty().writeValueAsString(spec);
+	}
+
+	private static void addRoutes(OpenAPI spec, String basePath, ApiRouter router) {
+		router.getEndpointRoutes().forEach(r -> {
 			PathItem item = toItem(r);
-			String path = r.path();
+			String path = basePath + r.path();
 			log.info("Adding route {" + path + "}");
 			spec.path(path, item);
 		});
 
-		api.getSubRouters().forEach(entry -> {
-			String basePath = entry.getPath();
-			ApiRouter router = entry.getRouter();
+	}
 
-			router.getEndpointRoutes().forEach(r -> {
-				PathItem item = toItem(r);
-				String path = basePath + r.path();
-				log.info("Adding route of subrouter {" + path + "}");
-				spec.path(path, item);
-			});
+	private static void walkRouter(OpenAPI spec, String basePath, ApiRouter router) {
+		router.getSubRouters().forEach(entry -> {
+			walkRouter(spec, basePath + entry.getPath(), entry.getRouter());
 		});
 
-		Tag tag = new Tag();
-		tag.setDescription("blub");
-		spec.addTagsItem(tag);
+		addRoutes(spec, basePath, router);
 
-		return Yaml.pretty().writeValueAsString(spec);
 	}
 
 	private static PathItem toItem(ApiRoute r) {
@@ -60,10 +67,13 @@ public class OpenAPIGenerator {
 		HttpMethod method = r.method();
 		if (method != null) {
 			Operation op = new Operation();
-			op.setDescription("blub");
-			op.summary("The summary");
+
+			op.setDescription(r.description());
+			// op.summary("The summary");
+
 			addResponses(r, op);
 			addRequests(r, op);
+
 			switch (r.method()) {
 			case HEAD:
 				pathItem.setHead(op);

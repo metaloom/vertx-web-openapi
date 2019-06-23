@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.jotschi.vertx.openapi.OpenAPIGenerator;
 import de.jotschi.vertx.router.ApiRouter;
-import de.jotschi.vertx.router.impl.APIRouterImpl;
+import de.jotschi.vertx.router.impl.ApiRouterImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +26,7 @@ public class OpenAPITest {
 	}
 
 	private ApiRouter createAPI() {
-		ApiRouter root = new APIRouterImpl(Vertx.vertx());
+		ApiRouter root = new ApiRouterImpl(Vertx.vertx());
 		root.description("The root router");
 		root.route("/root1").method(HttpMethod.POST)
 			.exampleRequest("application/json", "{ \"value\": \"The example request\"}", "The required request")
@@ -36,10 +36,14 @@ public class OpenAPITest {
 			.consumes("application/json")
 			.produces("application/json");
 
-		ApiRouter level1 = new APIRouterImpl(Vertx.vertx());
-		level1.route("/blub").method(HttpMethod.POST).consumes("application/json");
+		ApiRouter level1 = new ApiRouterImpl(Vertx.vertx());
+		level1.route("/anotherRoute").method(HttpMethod.POST).consumes("application/json");
+
+		ApiRouter level2 = new ApiRouterImpl(Vertx.vertx());
+		level2.route("/onLevel3").description("Route on level 3").method(HttpMethod.POST).consumes("application/json");
 
 		root.mountSubRouter("/test", level1);
+		level1.mountSubRouter("/level2", level2);
 		return root;
 	}
 }
