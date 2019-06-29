@@ -1,8 +1,12 @@
 package de.jotschi.vertx.openapi;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.jotschi.vertx.route.ApiRoute;
+import de.jotschi.vertx.route.query.QueryParameter;
 import de.jotschi.vertx.router.ApiRouter;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -10,6 +14,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -69,6 +74,7 @@ public class OpenAPIGenerator {
 			Operation op = new Operation();
 
 			op.setDescription(r.description());
+			addParameters(r, op);
 			// op.summary("The summary");
 
 			addResponses(r, op);
@@ -106,6 +112,22 @@ public class OpenAPIGenerator {
 
 		}
 		return pathItem;
+	}
+
+	private static void addParameters(ApiRoute r, Operation op) {
+		Map<String, QueryParameter> params = r.queryParameters();
+		for(Entry<String, QueryParameter> entry: params.entrySet()) {
+			String key = entry.getKey();
+			QueryParameter value = entry.getValue();
+			
+			Parameter parameter = new Parameter();
+			parameter.setName(key);
+			parameter.description(value.description());
+			parameter.example(value.example());
+			//parameter.required( )
+			op.addParametersItem(parameter);
+		}
+		
 	}
 
 	private static void addRequests(ApiRoute r, Operation op) {

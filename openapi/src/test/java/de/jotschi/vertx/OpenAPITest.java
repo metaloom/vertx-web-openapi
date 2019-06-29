@@ -40,7 +40,11 @@ public class OpenAPITest {
 		level1.route("/anotherRoute").method(HttpMethod.POST).consumes("application/json");
 
 		ApiRouter level2 = new ApiRouterImpl(Vertx.vertx());
-		level2.route("/onLevel3").description("Route on level 3").method(HttpMethod.POST).consumes("application/json");
+		level2.route("/onLevel3")
+		.description("Route on level 3")
+		.method(HttpMethod.POST)
+		.queryParameter("query", "The query parameter", "test")
+		.consumes("application/json");
 
 		root.mountSubRouter("/test", level1);
 		level1.mountSubRouter("/level2", level2);

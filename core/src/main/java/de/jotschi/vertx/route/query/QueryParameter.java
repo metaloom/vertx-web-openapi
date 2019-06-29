@@ -16,7 +16,19 @@ public interface QueryParameter {
 	 */
 	String description();
 
-	void example(String example);
+	/**
+	 * Set the example value.
+	 * 
+	 * @param example
+	 */
+	void example(Object example);
+
+	/**
+	 * Return the example value.
+	 * 
+	 * @return
+	 */
+	Object example();
 
 	/**
 	 * Return the key of the query parameter.

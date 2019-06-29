@@ -8,6 +8,8 @@ public class QueryParameterImpl implements QueryParameter {
 
 	private String key;
 
+	private Object example;
+
 	public QueryParameterImpl(String key) {
 		this.key = key;
 	}
@@ -28,8 +30,13 @@ public class QueryParameterImpl implements QueryParameter {
 	}
 
 	@Override
-	public void example(String example) {
-		// TODO Auto-generated method stub
+	public void example(Object example) {
+		this.example = example;
+	}
+
+	@Override
+	public Object example() {
+		return example;
 	}
 
 }
