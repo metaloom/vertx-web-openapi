@@ -66,10 +66,6 @@ public interface ApiRoute extends Route {
 
 	ApiRoute produces(String contentType);
 
-	ApiRoute exampleRequest(String mimeType, String example, String description);
-
-	ApiRoute exampleResponse(HttpResponseStatus code, String mimeType, Object example, String description);
-
 	ApiRoute traits(String... traits);
 
 	String[] traits();
@@ -115,17 +111,21 @@ public interface ApiRoute extends Route {
 
 	ApiRoute pathRegex(String path);
 
-	// Examples
+	// Example - Request
+
+	ApiRoute exampleRequest(String mimeType, Request request);
 
 	Map<Integer, Response> exampleResponses();
 
+	// Example - Response
+
+	ApiRoute exampleResponse(HttpResponseStatus status, Response response);
+
 	Map<String, Request> exampleRequests();
 
+	// Example - Query Parameters
+
 	ApiRoute queryParameter(String key, String description, String example);
-
-	ApiRoute exampleResponse(HttpResponseStatus status, String description);
-
-	ApiRoute exampleResponse(HttpResponseStatus status, String description, String headerName, String example, String headerDescription);
 
 	Map<String, QueryParameter> queryParameters();
 

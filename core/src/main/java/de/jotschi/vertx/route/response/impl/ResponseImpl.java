@@ -1,17 +1,34 @@
 package de.jotschi.vertx.route.response.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import de.jotschi.vertx.route.header.Header;
 import de.jotschi.vertx.route.response.Response;
 
 public class ResponseImpl implements Response {
 
 	private String description;
 
+	private Map<String, String> headers = new HashMap<>();
+
 	private Object example;
 
 	private String mimeType;
+
+	public ResponseImpl(String mimeType) {
+		this.mimeType = mimeType;
+	}
+
+	public ResponseImpl() {
+	}
+
+	public static Response response(String mimeType) {
+		return new ResponseImpl(mimeType);
+	}
+
+	public static Response response() {
+		return new ResponseImpl();
+	}
 
 	@Override
 	public Response description(String description) {
@@ -25,21 +42,16 @@ public class ResponseImpl implements Response {
 	}
 
 	@Override
-	public Response headers(Map<String, Header> headers) {
-		return this;
-	}
-
-	@Override
-	public Object example() {
+	public Object body() {
 		return example;
 	}
 
 	@Override
-	public Response example(Object example) {
+	public Response body(Object example) {
 		this.example = example;
 		return this;
 	}
-	
+
 	@Override
 	public String mimeType() {
 		return mimeType;
@@ -51,5 +63,15 @@ public class ResponseImpl implements Response {
 		return this;
 	}
 
+	@Override
+	public Map<String, String> headers() {
+		return headers;
+	}
+
+	@Override
+	public Response header(String name, String value) {
+		headers.put(name, value);
+		return this;
+	}
 
 }

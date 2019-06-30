@@ -12,6 +12,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -116,18 +117,18 @@ public class OpenAPIGenerator {
 
 	private static void addParameters(ApiRoute r, Operation op) {
 		Map<String, QueryParameter> params = r.queryParameters();
-		for(Entry<String, QueryParameter> entry: params.entrySet()) {
+		for (Entry<String, QueryParameter> entry : params.entrySet()) {
 			String key = entry.getKey();
 			QueryParameter value = entry.getValue();
-			
+
 			Parameter parameter = new Parameter();
 			parameter.setName(key);
 			parameter.description(value.description());
 			parameter.example(value.example());
-			//parameter.required( )
+			// parameter.required( )
 			op.addParametersItem(parameter);
 		}
-		
+
 	}
 
 	private static void addRequests(ApiRoute r, Operation op) {
@@ -135,14 +136,22 @@ public class OpenAPIGenerator {
 			return;
 		}
 		r.exampleRequests().forEach((exampleType, exampleRequest) -> {
-			RequestBody body = new RequestBody();
-			Content content = new Content();
-			MediaType mediaType = new MediaType();
-			mediaType.example(exampleRequest.body());
-			content.put(exampleType, mediaType);
 
-			body.setContent(content);
-			op.requestBody(body);
+			if (exampleRequest.body() != null) {
+				RequestBody body = new RequestBody();
+				Content content = new Content();
+				MediaType mediaType = new MediaType();
+				mediaType.example(exampleRequest.body());
+				content.put(exampleType, mediaType);
+				body.setContent(content);
+				op.requestBody(body);
+			}
+
+			exampleRequest.headers().entrySet().forEach(header -> {
+				//addHeaderObject(header.getKey(), new Header().example(header.getValue()));
+				// TODO add request headers
+			});
+
 		});
 
 	}
@@ -156,16 +165,20 @@ public class OpenAPIGenerator {
 			ApiResponse apiResponse = new ApiResponse();
 			apiResponse.setDescription(response.description());
 
-			Content content = new Content();
-			MediaType mediaType = new MediaType();
-			Object example = response.example();
-			if (example instanceof JsonObject) {
-				example = ((JsonObject) example).encodePrettily();
+			if (response.body() != null) {
+				Content content = new Content();
+				MediaType mediaType = new MediaType();
+				Object example = response.body();
+				if (example instanceof JsonObject) {
+					example = ((JsonObject) example).encodePrettily();
+				}
+				mediaType.setExample(example);
+				content.put(response.mimeType(), mediaType);
+				apiResponse.setContent(content);
 			}
-			mediaType.setExample(example);
-
-			content.put(response.mimeType(), mediaType);
-			apiResponse.setContent(content);
+			response.headers().entrySet().forEach(header -> {
+				apiResponse.addHeaderObject(header.getKey(), new Header().example(header.getValue()));
+			});
 			responses.addApiResponse(String.valueOf(code), apiResponse);
 		});
 		op.setResponses(responses);

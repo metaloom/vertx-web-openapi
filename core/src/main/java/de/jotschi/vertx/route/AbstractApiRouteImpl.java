@@ -9,14 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 import de.jotschi.vertx.event.Event;
-import de.jotschi.vertx.route.header.Header;
-import de.jotschi.vertx.route.header.impl.HeaderImpl;
 import de.jotschi.vertx.route.query.QueryParameter;
 import de.jotschi.vertx.route.query.impl.QueryParameterImpl;
 import de.jotschi.vertx.route.request.Request;
-import de.jotschi.vertx.route.request.impl.RequestImpl;
 import de.jotschi.vertx.route.response.Response;
-import de.jotschi.vertx.route.response.impl.ResponseImpl;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -167,16 +163,6 @@ public abstract class AbstractApiRouteImpl implements ApiRoute {
 		return this;
 	}
 
-	// @Override
-	// public List<String> getNamedSegments() {
-	// List<String> allMatches = new ArrayList<String>();
-	// Matcher m = Pattern.compile("\\{[^}]*\\}").matcher(path());
-	// while (m.find()) {
-	// allMatches.add(m.group().substring(1, m.group().length() - 1));
-	// }
-	// return allMatches;
-	// }
-
 	@Override
 	public ApiRoute blockingHandler(Handler<RoutingContext> requestHandler) {
 		route.blockingHandler(requestHandler);
@@ -247,48 +233,6 @@ public abstract class AbstractApiRouteImpl implements ApiRoute {
 	}
 
 	@Override
-	public ApiRoute exampleResponse(HttpResponseStatus status, String description, String headerName, String example, String headerDescription) {
-		Response response = new ResponseImpl();
-		response.description(description);
-		exampleResponses.put(status.code(), response);
-		if (headerName != null) {
-			Header header = new HeaderImpl();
-			header.description(headerDescription);
-			header.example(example);
-			Map<String, Header> headers = new HashMap<>();
-			headers.put(headerName, header);
-			response.headers(headers);
-		}
-		return this;
-	}
-
-	@Override
-	public ApiRoute exampleResponse(HttpResponseStatus status, String description) {
-		return exampleResponse(status, description, null, null, null);
-	}
-
-	@Override
-	public ApiRoute exampleResponse(HttpResponseStatus status, String mimeType, Object example, String description) {
-		Response response = new ResponseImpl();
-		response.description(description);
-		response.example(example);
-		response.mimeType(mimeType);
-		exampleResponses.put(status.code(), response);
-		exampleResponseClasses.put(status.code(), example.getClass());
-		return this;
-	}
-
-	@Override
-	public ApiRoute exampleRequest(String mimeType, String bodyText, String description) {
-		Request request = new RequestImpl();
-		request.description(description);
-		request.body(bodyText);
-		request.mimeType(mimeType);
-		this.exampleRequests.put(mimeType, request);
-		return this;
-	}
-
-	@Override
 	public ApiRoute traits(String... traits) {
 		this.traits = traits;
 		return this;
@@ -300,8 +244,21 @@ public abstract class AbstractApiRouteImpl implements ApiRoute {
 	}
 
 	@Override
+	public ApiRoute exampleResponse(HttpResponseStatus status, Response response) {
+		exampleResponses.put(status.code(), response);
+		return this;
+	}
+
+	@Override
 	public Map<Integer, Response> exampleResponses() {
 		return exampleResponses;
+	}
+
+	@Override
+	public ApiRoute exampleRequest(String mimeType, Request request) {
+		request.mimeType(mimeType);
+		this.exampleRequests.put(mimeType, request);
+		return this;
 	}
 
 	@Override
@@ -333,36 +290,6 @@ public abstract class AbstractApiRouteImpl implements ApiRoute {
 		return this;
 	}
 
-	/**
-	 * Convert the provided vertx path to a RAML path.
-	 * 
-	 * @param path
-	 * @return RAML Path which contains '{}' instead of ':' characters
-	 */
-	protected String convertPath(String path) {
-		StringBuilder builder = new StringBuilder();
-		String[] segments = path.split("/");
-		for (int i = 0; i < segments.length; i++) {
-			String segment = segments[i];
-			if (segment.startsWith(":")) {
-				segment = "{" + segment.substring(1) + "}";
-			}
-			builder.append(segment);
-			if (i != segments.length - 1) {
-				builder.append("/");
-			}
-		}
-		if (path.endsWith("/")) {
-			builder.append("/");
-		}
-		return builder.toString();
-	}
-
-	// @Override
-	// public Class<? extends RestModel> getExampleRequestClass() {
-	// return exampleRequestClass;
-	// }
-
 	@Override
 	public ApiRoute events(Event... events) {
 		this.events.addAll(Arrays.asList(events));
@@ -381,20 +308,17 @@ public abstract class AbstractApiRouteImpl implements ApiRoute {
 
 	@Override
 	public String getPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return route.getPath();
 	}
 
 	@Override
 	public Set<HttpMethod> methods() {
-		// TODO Auto-generated method stub
-		return null;
+		return route.methods();
 	}
 
 	@Override
 	public Route setRegexGroupsNames(List<String> groups) {
-		// TODO Auto-generated method stub
-		return null;
+		return route.setRegexGroupsNames(groups);
 	}
 
 }

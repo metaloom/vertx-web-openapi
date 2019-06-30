@@ -1,6 +1,9 @@
 package de.jotschi.vertx;
 
+import static de.jotschi.vertx.route.request.impl.RequestImpl.request;
+import static de.jotschi.vertx.route.response.impl.ResponseImpl.response;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.CREATED;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.junit.Assert.assertEquals;
 
@@ -29,10 +32,25 @@ public class OpenAPITest {
 		ApiRouter root = new ApiRouterImpl(Vertx.vertx());
 		root.description("The root router");
 		root.route("/root1").method(HttpMethod.POST)
-			.exampleRequest("application/json", "{ \"value\": \"The example request\"}", "The required request")
-			.exampleResponse(OK, "text/plain", "The example response", "Regular response of this endpoint")
-			.exampleResponse(BAD_REQUEST, "application/json", new JsonObject().put("test", "The example response"),
-				"Regular response of this endpoint")
+			.exampleRequest("application/json",
+				request()
+					.body("{ \"value\": \"The example request\"}")
+					.description("The required request")
+					.header("CUSTOM_HEADER", "ABC"))
+
+			.exampleResponse(OK,
+				response("text/plain")
+					.body("The example response")
+					.description("Regular response of this endpoint"))
+
+			.exampleResponse(BAD_REQUEST,
+				response("application/json")
+					.body(new JsonObject().put("test", "The example response"))
+					.description("Regular response of this endpoint"))
+
+			.exampleResponse(CREATED, response()
+				.description("Element created")
+				.header("API_VERSION", "1.0"))
 			.consumes("application/json")
 			.produces("application/json");
 
@@ -41,10 +59,10 @@ public class OpenAPITest {
 
 		ApiRouter level2 = new ApiRouterImpl(Vertx.vertx());
 		level2.route("/onLevel3")
-		.description("Route on level 3")
-		.method(HttpMethod.POST)
-		.queryParameter("query", "The query parameter", "test")
-		.consumes("application/json");
+			.description("Route on level 3")
+			.method(HttpMethod.POST)
+			.queryParameter("query", "The query parameter", "test")
+			.consumes("application/json");
 
 		root.mountSubRouter("/test", level1);
 		level1.mountSubRouter("/level2", level2);
