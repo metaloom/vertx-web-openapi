@@ -1,8 +1,10 @@
 package de.jotschi.vertx.route.request.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import de.jotschi.vertx.route.header.Header;
+import de.jotschi.vertx.route.header.impl.HeaderImpl;
 import de.jotschi.vertx.route.request.Request;
 
 public class RequestImpl implements Request {
@@ -13,7 +15,7 @@ public class RequestImpl implements Request {
 
 	private String mimeType;
 
-	private Map<String, String> headers = new HashMap<>();
+	private List<Header> headers = new ArrayList<>();
 
 	public RequestImpl() {
 	}
@@ -56,13 +58,13 @@ public class RequestImpl implements Request {
 	}
 
 	@Override
-	public Map<String, String> headers() {
+	public List<Header> headers() {
 		return headers;
 	}
 
 	@Override
-	public Request header(String name, String value) {
-		headers.put(name, value);
+	public Request header(String name, String description, Object value) {
+		headers.add(new HeaderImpl().name(name).example(value).description(description));
 		return this;
 	}
 

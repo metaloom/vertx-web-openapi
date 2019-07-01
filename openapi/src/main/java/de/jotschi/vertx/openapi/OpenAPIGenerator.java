@@ -1,7 +1,9 @@
 package de.jotschi.vertx.openapi;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -12,13 +14,17 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.servers.Server;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -28,8 +34,33 @@ public class OpenAPIGenerator {
 
 	public static final Logger log = LoggerFactory.getLogger(OpenAPIGenerator.class);
 
-	public static String gen(ApiRouter router) throws JsonProcessingException {
+	protected String baseUrl;
+
+	protected String title;
+
+	protected ApiRouter router;
+
+	protected String description;
+
+	private OpenAPIGenerator(String baseUrl, String description, ApiRouter router, String title) {
+		this.baseUrl = baseUrl;
+		this.description = description;
+		this.router = router;
+		this.title = title;
+	}
+
+	public String generate() throws JsonProcessingException {
 		OpenAPI spec = new OpenAPI();
+
+		Info info = new Info();
+		info.setDescription(description);
+		info.setTitle(title);
+		spec.setInfo(info);
+
+		Server server = new Server();
+		server.setDescription(description);
+		server.setUrl(baseUrl);
+		spec.addServersItem(server);
 
 		addRoutes(spec, "", router);
 
@@ -42,7 +73,6 @@ public class OpenAPIGenerator {
 		// Tag tag = new Tag();
 		// tag.setDescription("tag");
 		// spec.addTagsItem(tag);
-
 		return Yaml.pretty().writeValueAsString(spec);
 	}
 
@@ -119,12 +149,14 @@ public class OpenAPIGenerator {
 		Map<String, QueryParameter> params = r.queryParameters();
 		for (Entry<String, QueryParameter> entry : params.entrySet()) {
 			String key = entry.getKey();
-			QueryParameter value = entry.getValue();
+			QueryParameter queryParam = entry.getValue();
+			Object value = queryParam.example();
 
 			Parameter parameter = new Parameter();
 			parameter.setName(key);
-			parameter.description(value.description());
-			parameter.example(value.example());
+			parameter.description(queryParam.description());
+			parameter.example(value);
+			parameter.schema(schemaOf(value));
 			// parameter.required( )
 			op.addParametersItem(parameter);
 		}
@@ -136,7 +168,6 @@ public class OpenAPIGenerator {
 			return;
 		}
 		r.exampleRequests().forEach((exampleType, exampleRequest) -> {
-
 			if (exampleRequest.body() != null) {
 				RequestBody body = new RequestBody();
 				Content content = new Content();
@@ -147,13 +178,37 @@ public class OpenAPIGenerator {
 				op.requestBody(body);
 			}
 
-			exampleRequest.headers().entrySet().forEach(header -> {
-				//addHeaderObject(header.getKey(), new Header().example(header.getValue()));
-				// TODO add request headers
+			Map<String, Example> headerExamples = new HashMap<>();
+			exampleRequest.headers().forEach(header -> {
+				String name = header.name();
+				Object value = header.example();
+
+				Example headerValue = new Example();
+				headerValue.setValue(value);
+				headerExamples.put(name, headerValue);
+				Parameter headers = new Parameter().in("header");
+				headers.setName(name);
+				headers.description(header.description());
+				headers.setExamples(headerExamples);
+
+				headers.schema(schemaOf(value));
+				op.addParametersItem(headers);
 			});
-
 		});
+	}
 
+	private static Schema<?> schemaOf(Object value) {
+		Schema<?> schema = new Schema<>();
+		if (value instanceof Number) {
+			schema.type("number");
+		}
+		if (value instanceof String) {
+			schema.type("string");
+		}
+		if (value instanceof Boolean) {
+			schema.type("boolean");
+		}
+		return schema;
 	}
 
 	private static void addResponses(ApiRoute r, Operation op) {
@@ -184,4 +239,41 @@ public class OpenAPIGenerator {
 		op.setResponses(responses);
 	}
 
+	public static class Builder {
+
+		private String baseUrl = "http://localhost:8080";
+		private String description;
+		private ApiRouter apiRouter;
+		private String title;
+
+		public Builder baseUrl(String baseUrl) {
+			this.baseUrl = baseUrl;
+			return this;
+		}
+
+		public Builder description(String description) {
+			this.description = description;
+			return this;
+		}
+
+		public Builder apiRouter(ApiRouter apiRouter) {
+			this.apiRouter = apiRouter;
+			return this;
+		}
+
+		public Builder title(String title) {
+			this.title = title;
+			return this;
+		}
+
+		public String generate() throws JsonProcessingException {
+			Objects.requireNonNull(apiRouter, "An API Router has to be specified.");
+			Objects.requireNonNull(baseUrl, "A valid baseurl has to be specified.");
+			return new OpenAPIGenerator(baseUrl, description, apiRouter, title).generate();
+		}
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
 }

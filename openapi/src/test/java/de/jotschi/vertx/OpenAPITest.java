@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import de.jotschi.vertx.openapi.OpenAPIGenerator;
+import de.jotschi.vertx.openapi.OpenAPIGenerator.Builder;
 import de.jotschi.vertx.router.ApiRouter;
 import de.jotschi.vertx.router.impl.ApiRouterImpl;
 import io.vertx.core.Vertx;
@@ -20,11 +21,16 @@ import io.vertx.core.json.JsonObject;
 
 public class OpenAPITest {
 	@Test
-	public void testRouting() throws JsonProcessingException {
+	public void testRouting() throws JsonProcessingException {	
 		ApiRouter api = createAPI();
 		assertEquals("The root router", api.description());
 
-		String yaml = OpenAPIGenerator.gen(api);
+		Builder builder = OpenAPIGenerator.builder();
+		builder.baseUrl("https://server.tld");
+		builder.description("The API for our example server");
+		builder.apiRouter(api);
+		
+		String yaml = builder.generate();
 		System.out.println(yaml);
 	}
 
@@ -36,7 +42,8 @@ public class OpenAPITest {
 				request()
 					.body("{ \"value\": \"The example request\"}")
 					.description("The required request")
-					.header("CUSTOM_HEADER", "ABC"))
+					.header("CUSTOM_HEADER", "Example header", "ABC")
+					.header("CUSTOM_HEADER2", "Example header2", "ABC2"))
 
 			.exampleResponse(OK,
 				response("text/plain")

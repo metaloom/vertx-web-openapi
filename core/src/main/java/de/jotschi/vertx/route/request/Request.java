@@ -1,6 +1,8 @@
 package de.jotschi.vertx.route.request;
 
-import java.util.Map;
+import java.util.List;
+
+import de.jotschi.vertx.route.header.Header;
 
 public interface Request {
 
@@ -15,7 +17,7 @@ public interface Request {
 	 * Set the description of the request.
 	 * 
 	 * @param description
-	 * @return
+	 * @return Fluent API
 	 */
 	Request description(String description);
 
@@ -30,7 +32,7 @@ public interface Request {
 	 * Set the request body.
 	 * 
 	 * @param example
-	 * @return
+	 * @return Fluent API
 	 */
 	Request body(Object example);
 
@@ -41,6 +43,12 @@ public interface Request {
 	 */
 	String mimeType();
 
+	/**
+	 * Set the mimeType of the request body.
+	 * 
+	 * @param mimeType
+	 * @return Fluent API
+	 */
 	Request mimeType(String mimeType);
 
 	/**
@@ -48,14 +56,15 @@ public interface Request {
 	 * 
 	 * @return
 	 */
-	Map<String, String> headers();
+	List<Header> headers();
 
 	/**
 	 * Set the header for the response.
 	 * 
 	 * @param name
+	 * @param description
 	 * @param value
-	 * @return
+	 * @return Fluent API
 	 */
-	Request header(String name, String value);
+	Request header(String name, String description, Object value);
 }
