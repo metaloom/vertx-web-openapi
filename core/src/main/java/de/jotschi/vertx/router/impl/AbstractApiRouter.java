@@ -26,7 +26,7 @@ public abstract class AbstractApiRouter implements ApiRouter {
 
 	private List<RouterEntry> subRouters = new ArrayList<>();
 
-	private List<ApiRoute> endpointRoutes = new ArrayList<>();
+	private List<ApiRoute> apiRoutes = new ArrayList<>();
 
 	public AbstractApiRouter(Router router) {
 		this.router = router;
@@ -209,8 +209,8 @@ public abstract class AbstractApiRouter implements ApiRouter {
 	}
 
 	@Override
-	public List<ApiRoute> getEndpointRoutes() {
-		return endpointRoutes;
+	public List<ApiRoute> getApiRoutes() {
+		return apiRoutes;
 	}
 
 	@Override
@@ -289,7 +289,7 @@ public abstract class AbstractApiRouter implements ApiRouter {
 
 	private ApiRoute wrap(Route route) {
 		ApiRoute endpointRoute = ApiRoute.create(route);
-		endpointRoutes.add(endpointRoute);
+		apiRoutes.add(endpointRoute);
 		return endpointRoute;
 	}
 

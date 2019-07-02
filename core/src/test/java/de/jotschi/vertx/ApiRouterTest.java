@@ -4,17 +4,19 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import de.jotschi.vertx.router.impl.ApiRouterImpl;
+import de.jotschi.vertx.router.ApiRouter;
 import io.vertx.core.Vertx;
 
 public class ApiRouterTest {
 
 	@Test
 	public void testRouting() {
-		ApiRouterImpl root = new ApiRouterImpl(Vertx.vertx());
+		Vertx vertx = Vertx.vertx();
+
+		ApiRouter root = ApiRouter.create(vertx);
 		root.description("The root router");
 
-		ApiRouterImpl level1 = new ApiRouterImpl(Vertx.vertx());
+		ApiRouter level1 = ApiRouter.create(vertx);
 		level1.route("/blub");
 
 		root.mountSubRouter("/test", level1);

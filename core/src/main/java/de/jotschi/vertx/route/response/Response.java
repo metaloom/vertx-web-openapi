@@ -2,6 +2,9 @@ package de.jotschi.vertx.route.response;
 
 import java.util.Map;
 
+/**
+ * Describes a HTTP response.
+ */
 public interface Response {
 
 	/**

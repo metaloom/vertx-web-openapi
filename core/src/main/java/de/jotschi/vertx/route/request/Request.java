@@ -4,6 +4,9 @@ import java.util.List;
 
 import de.jotschi.vertx.route.header.Header;
 
+/**
+ * Describes an HTTP request.
+ */
 public interface Request {
 
 	/**

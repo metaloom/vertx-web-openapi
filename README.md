@@ -1,34 +1,93 @@
-# Vert.x Web API
+[![](https://jitpack.io/v/Jotschi/vertx-web-openapi.svg)](https://jitpack.io/#Jotschi/vertx-web-openapi)
 
-This project aims to provide wrappers for Vert.x Routes and Routers. These wrappers enhance the existing Vert.x API to provide extra information which can be used to generate documentation and specification of the defined API.
+# Vert.x OpenAPI
+
+This project provides wrappers for Vert.x Routes and Routers. These wrappers enhance the existing Vert.x API to provide extra information which can be used to generate documentation and specification of the defined API.
+
+## Maven
+
+```
+<repositories>
+	<repository>
+	    <id>jitpack.io</id>
+	    <url>https://jitpack.io</url>
+	</repository>
+</repositories>
+```
+
+```
+<dependency>
+    <groupId>com.github.Jotschi</groupId>
+    <artifactId>vertx-web-openapi-generator</artifactId>
+    <version>-</version>
+</dependency>
+```
 
 ## Usage Example
 
-
-
 ```
-ApiRouter root = new ApiRouterImpl(Vertx.vertx());
-root.description("The root router");
-root.route("/root1").method(HttpMethod.POST)
-	.exampleRequest("application/json", "{ \"value\": \"The example request\"}", "The required request")
-	.exampleResponse(OK, "text/plain", "The example response", "Regular response of this endpoint")
-	.exampleResponse(BAD_REQUEST, "application/json", new JsonObject().put("test", "The example response"),
-		"Regular response of this endpoint")
+Vertx vertx = Vertx.vertx();
+
+// 1. Use ApiRouter instead of Router
+ApiRouter api = ApiRouter.create(vertx);
+api.description("The root router");
+api.route("/root1").method(HttpMethod.POST)
+	.exampleRequest("application/json",
+		request()
+			.body("{ \"value\": \"The example request\"}")
+			.description("The required request")
+			.header("CUSTOM_HEADER", "Example header", "ABC")
+			.header("CUSTOM_HEADER2", "Example header2", "ABC2"))
+
+	.exampleResponse(OK,
+		response("text/plain")
+			.body("The example response")
+			.description("Regular response of this endpoint"))
+
+	.exampleResponse(BAD_REQUEST,
+		response("application/json")
+			.body(new JsonObject().put("test", "The example response"))
+			.description("Regular response of this endpoint"))
+
+	.exampleResponse(CREATED, response()
+		.description("Element created")
+		.header("API_VERSION", "1.0"))
 	.consumes("application/json")
 	.produces("application/json");
 
-ApiRouter level1 = new ApiRouterImpl(Vertx.vertx());
-level1.route("/anotherRoute").method(HttpMethod.POST).consumes("application/json");
+ApiRouter level1 = ApiRouter.create(vertx);
+level1.route("/anotherRoute")
+	.method(HttpMethod.POST)
+	.consumes("application/json");
 
-root.mountSubRouter("/test", level1);
+ApiRouter level2 = ApiRouter.create(vertx);
+level2.route("/onLevel3")
+	.description("Route on level 3")
+	.method(HttpMethod.POST)
+	.queryParameter("query", "The query parameter", "test")
+	.consumes("application/json");
 
-String yaml = OpenAPIGenerator.gen(root);
+api.mountSubRouter("/test", level1);
+level1.mountSubRouter("/level2", level2);
+assertEquals("The root router", api.description());
+
+// Now generate the OpenAPI spec using the defined routes
+Builder builder = OpenAPIGenerator.builder();
+builder.baseUrl("https://server.tld");
+builder.description("The API for our example server");
+builder.apiRouter(api);
+
+String yaml = builder.generate();
+System.out.println(yaml);
 ```
 
-## Core
+## Limitations / WIP
 
-Wrapper for Vert.x Routes/Router.
+This library is still work in progress and not every detail of the OpenAPI spec can be defined and generated using the ApiRoute/ApiRouter wrappers.
 
-## Open API
+Still missing:
 
-TBD
+* Response / Request schema support.
+* Full query parameter type support.
+
+

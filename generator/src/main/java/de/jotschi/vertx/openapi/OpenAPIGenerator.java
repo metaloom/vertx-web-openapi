@@ -30,6 +30,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+/**
+ * OpenAPI generator which consumes {@link ApiRouter} to extract route information for the generated Open API 3 spec.
+ */
 public class OpenAPIGenerator {
 
 	public static final Logger log = LoggerFactory.getLogger(OpenAPIGenerator.class);
@@ -77,7 +80,7 @@ public class OpenAPIGenerator {
 	}
 
 	private static void addRoutes(OpenAPI spec, String basePath, ApiRouter router) {
-		router.getEndpointRoutes().forEach(r -> {
+		router.getApiRoutes().forEach(r -> {
 			PathItem item = toItem(r);
 			String path = basePath + r.path();
 			log.info("Adding route {" + path + "}");
@@ -246,26 +249,56 @@ public class OpenAPIGenerator {
 		private ApiRouter apiRouter;
 		private String title;
 
+		/**
+		 * Set the API baseUrl.
+		 * 
+		 * @param baseUrl
+		 * @return
+		 */
 		public Builder baseUrl(String baseUrl) {
 			this.baseUrl = baseUrl;
 			return this;
 		}
 
+		/**
+		 * Set the API description.
+		 * 
+		 * @param description
+		 * @return
+		 */
 		public Builder description(String description) {
 			this.description = description;
 			return this;
 		}
 
+		/**
+		 * Set the API router which should be used as a source for the endpoints.
+		 * 
+		 * @param apiRouter
+		 * @return
+		 */
 		public Builder apiRouter(ApiRouter apiRouter) {
 			this.apiRouter = apiRouter;
 			return this;
 		}
 
+		/**
+		 * Set the title for the API.
+		 * 
+		 * @param title
+		 * @return
+		 */
 		public Builder title(String title) {
 			this.title = title;
 			return this;
 		}
 
+		/**
+		 * Generate the API specification.
+		 * 
+		 * @return
+		 * @throws JsonProcessingException
+		 */
 		public String generate() throws JsonProcessingException {
 			Objects.requireNonNull(apiRouter, "An API Router has to be specified.");
 			Objects.requireNonNull(baseUrl, "A valid baseurl has to be specified.");

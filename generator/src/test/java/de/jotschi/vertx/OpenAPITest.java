@@ -14,30 +14,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import de.jotschi.vertx.openapi.OpenAPIGenerator;
 import de.jotschi.vertx.openapi.OpenAPIGenerator.Builder;
 import de.jotschi.vertx.router.ApiRouter;
-import de.jotschi.vertx.router.impl.ApiRouterImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
 public class OpenAPITest {
 	@Test
-	public void testRouting() throws JsonProcessingException {	
-		ApiRouter api = createAPI();
-		assertEquals("The root router", api.description());
+	public void testRouting() throws JsonProcessingException {
+		Vertx vertx = Vertx.vertx();
 
-		Builder builder = OpenAPIGenerator.builder();
-		builder.baseUrl("https://server.tld");
-		builder.description("The API for our example server");
-		builder.apiRouter(api);
-		
-		String yaml = builder.generate();
-		System.out.println(yaml);
-	}
-
-	private ApiRouter createAPI() {
-		ApiRouter root = new ApiRouterImpl(Vertx.vertx());
-		root.description("The root router");
-		root.route("/root1").method(HttpMethod.POST)
+		// 1. Use ApiRouter instead of Router
+		ApiRouter api = ApiRouter.create(vertx);
+		api.description("The root router");
+		api.route("/root1").method(HttpMethod.POST)
 			.exampleRequest("application/json",
 				request()
 					.body("{ \"value\": \"The example request\"}")
@@ -61,18 +50,30 @@ public class OpenAPITest {
 			.consumes("application/json")
 			.produces("application/json");
 
-		ApiRouter level1 = new ApiRouterImpl(Vertx.vertx());
-		level1.route("/anotherRoute").method(HttpMethod.POST).consumes("application/json");
+		ApiRouter level1 = ApiRouter.create(vertx);
+		level1.route("/anotherRoute")
+			.method(HttpMethod.POST)
+			.consumes("application/json");
 
-		ApiRouter level2 = new ApiRouterImpl(Vertx.vertx());
+		ApiRouter level2 = ApiRouter.create(vertx);
 		level2.route("/onLevel3")
 			.description("Route on level 3")
 			.method(HttpMethod.POST)
 			.queryParameter("query", "The query parameter", "test")
 			.consumes("application/json");
 
-		root.mountSubRouter("/test", level1);
+		api.mountSubRouter("/test", level1);
 		level1.mountSubRouter("/level2", level2);
-		return root;
+		assertEquals("The root router", api.description());
+
+		// Now generate the OpenAPI spec using the defined routes
+		Builder builder = OpenAPIGenerator.builder();
+		builder.baseUrl("https://server.tld");
+		builder.description("The API for our example server");
+		builder.apiRouter(api);
+
+		String yaml = builder.generate();
+		System.out.println(yaml);
 	}
+
 }
