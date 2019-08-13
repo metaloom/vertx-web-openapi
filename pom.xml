@@ -8,7 +8,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<vertx.version>3.7.1</vertx.version>
+		<vertx.version>3.8.0</vertx.version>
 	</properties>
 
 	<modules>
