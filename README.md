@@ -1,5 +1,3 @@
-[![](https://jitpack.io/v/Jotschi/vertx-web-openapi.svg)](https://jitpack.io/#Jotschi/vertx-web-openapi)
-
 # Vert.x OpenAPI
 
 This project provides wrappers for Vert.x Routes and Routers. These wrappers enhance the existing Vert.x API to provide extra information which can be used to generate documentation and specification of the defined API.
@@ -16,7 +14,6 @@ This project provides wrappers for Vert.x Routes and Routers. These wrappers enh
 
 ## Usage Example
 
-```
 ```java
 Vertx vertx = Vertx.vertx();
 
