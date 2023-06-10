@@ -143,7 +143,7 @@ public abstract class AbstractApiRouteImpl implements ApiRoute {
 	public ApiRoute validate() {
 		if (!produces.isEmpty() && exampleResponses.isEmpty()) {
 			log.error("Endpoint {" + path() + "} has no example response.");
-			throw new RuntimeException("Endpoint {" + path() + "} has no example responses.");
+			throw new RuntimeException("Endpoint {" + method() + " " + path() + "} has no example responses.");
 		}
 		// if ((consumes.contains(APPLICATION_JSON) || consumes.contains(APPLICATION_JSON_UTF8)) && exampleRequestMap == null) {
 		// log.error("Endpoint {" + path() + "} has no example request.");

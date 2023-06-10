@@ -63,6 +63,8 @@ assertEquals("The root router", api.description());
 // Now generate the OpenAPI spec using the defined routes
 Builder builder = OpenAPIGenerator.builder();
 builder.baseUrl("https://server.tld");
+builder.title("REST API");
+builder.version("1.0.0");
 builder.description("The API for our example server");
 builder.apiRouter(api);
 

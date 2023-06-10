@@ -7,7 +7,5 @@ public class ApiRouterImpl extends AbstractApiRouter {
 	public ApiRouterImpl(Vertx vertx) {
 		super(vertx);
 	}
-	
-	
 
 }

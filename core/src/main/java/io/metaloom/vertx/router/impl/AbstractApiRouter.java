@@ -55,7 +55,6 @@ public abstract class AbstractApiRouter implements ApiRouter {
 
 	@Override
 	public ApiRoute route(String path) {
-		System.out.println("Adding route for {" + path + "}");
 		return wrap(getDelegate().route(path));
 	}
 

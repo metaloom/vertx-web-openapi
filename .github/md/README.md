@@ -14,7 +14,6 @@ This project provides wrappers for Vert.x Routes and Routers. These wrappers enh
 
 ## Usage Example
 
-```
 ```java
 %{snippet|id=basicUsage|file=generator/src/test/java/io/metaloom/vertx/OpenAPITest.java}
 ```

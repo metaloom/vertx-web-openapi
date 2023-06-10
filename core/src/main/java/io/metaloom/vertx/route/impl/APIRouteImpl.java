@@ -9,4 +9,9 @@ public class APIRouteImpl extends AbstractApiRouteImpl {
 		super(route);
 	}
 
+	@Override
+	public String toString() {
+		return method() + " " + path();
+	}
+
 }

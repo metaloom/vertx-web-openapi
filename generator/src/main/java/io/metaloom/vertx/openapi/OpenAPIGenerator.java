@@ -46,11 +46,14 @@ public class OpenAPIGenerator {
 
 	protected String description;
 
-	private OpenAPIGenerator(String baseUrl, String description, ApiRouter router, String title) {
+	protected String version;
+
+	private OpenAPIGenerator(String baseUrl, String description, ApiRouter router, String title, String version) {
 		this.baseUrl = baseUrl;
 		this.description = description;
 		this.router = router;
 		this.title = title;
+		this.version = version;
 	}
 
 	public String generate() throws JsonProcessingException {
@@ -59,6 +62,7 @@ public class OpenAPIGenerator {
 		Info info = new Info();
 		info.setDescription(description);
 		info.setTitle(title);
+		info.version(version);
 		spec.setInfo(info);
 
 		Server server = new Server();
@@ -82,12 +86,16 @@ public class OpenAPIGenerator {
 
 	private static void addRoutes(OpenAPI spec, String basePath, ApiRouter router) {
 		router.getApiRoutes().forEach(r -> {
-			PathItem item = toItem(r);
 			String path = basePath + r.path();
-			log.info("Adding route {" + path + "}");
-			spec.path(path, item);
+			PathItem pathItem = spec.getPaths() == null ? null : spec.getPaths().get(path);
+			if (pathItem == null) {
+				pathItem = new PathItem();
+				pathItem.setDescription(r.description());
+			}
+			log.info("Adding route {" + r.method() + " " + path + "}");
+			updateItem(pathItem, r);
+			spec.path(path, pathItem);
 		});
-
 	}
 
 	private static void walkRouter(OpenAPI spec, String basePath, ApiRouter router) {
@@ -96,14 +104,9 @@ public class OpenAPIGenerator {
 		});
 
 		addRoutes(spec, basePath, router);
-
 	}
 
-	private static PathItem toItem(ApiRoute r) {
-		PathItem pathItem = new PathItem();
-
-		pathItem.setDescription(r.description());
-
+	private static PathItem updateItem(PathItem pathItem, ApiRoute r) {
 		HttpMethod method = r.method();
 		if (method != null) {
 			Operation op = new Operation();
@@ -162,7 +165,6 @@ public class OpenAPIGenerator {
 			// parameter.required( )
 			op.addParametersItem(parameter);
 		}
-
 	}
 
 	private static void addRequests(ApiRoute r, Operation op) {
@@ -214,10 +216,13 @@ public class OpenAPIGenerator {
 	}
 
 	private static void addResponses(ApiRoute r, Operation op) {
+		ApiResponses responses = new ApiResponses();
 		if (r.exampleResponses().isEmpty()) {
+			// ApiResponse apiResponse = new ApiResponse();
+			// apiResponse.setDescription("tadsgsd");
+			// responses.addApiResponse("204", apiResponse);
 			return;
 		}
-		ApiResponses responses = new ApiResponses();
 		r.exampleResponses().forEach((code, response) -> {
 			ApiResponse apiResponse = new ApiResponse();
 			apiResponse.setDescription(response.description());
@@ -226,8 +231,8 @@ public class OpenAPIGenerator {
 				Content content = new Content();
 				MediaType mediaType = new MediaType();
 				Object example = response.body();
-				if (example instanceof JsonObject) {
-					example = ((JsonObject) example).encodePrettily();
+				if (example instanceof JsonObject json) {
+					example = json.encodePrettily();
 				}
 				mediaType.setExample(example);
 				content.put(response.mimeType(), mediaType);
@@ -247,6 +252,7 @@ public class OpenAPIGenerator {
 		private String description;
 		private ApiRouter apiRouter;
 		private String title;
+		private String version;
 
 		/**
 		 * Set the API baseUrl.
@@ -267,6 +273,17 @@ public class OpenAPIGenerator {
 		 */
 		public Builder description(String description) {
 			this.description = description;
+			return this;
+		}
+
+		/**
+		 * Set the API version.
+		 * 
+		 * @param version
+		 * @return
+		 */
+		public Builder version(String version) {
+			this.version = version;
 			return this;
 		}
 
@@ -301,7 +318,9 @@ public class OpenAPIGenerator {
 		public String generate() throws JsonProcessingException {
 			Objects.requireNonNull(apiRouter, "An API Router has to be specified.");
 			Objects.requireNonNull(baseUrl, "A valid baseurl has to be specified.");
-			return new OpenAPIGenerator(baseUrl, description, apiRouter, title).generate();
+			Objects.requireNonNull(title, "A valid title has to be specified.");
+			Objects.requireNonNull(version, "A valid version has to be specified.");
+			return new OpenAPIGenerator(baseUrl, description, apiRouter, title, version).generate();
 		}
 	}
 
